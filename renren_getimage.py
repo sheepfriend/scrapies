@@ -1,3 +1,4 @@
+#download photos from a friend's album in renren.com
 # -*- coding:utf-8 -*-
 import requests
 import re
