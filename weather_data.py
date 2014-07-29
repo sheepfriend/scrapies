@@ -1,3 +1,4 @@
+#download temperature data from usclimatedata.com
 import urllib
 from bs4 import BeautifulSoup
 import json
