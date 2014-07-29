@@ -1,3 +1,4 @@
+#search key words from ifeng.com and count the numbers
 # -*- coding: utf-8 -*-
 """
 @author: Zibo, Kelly
