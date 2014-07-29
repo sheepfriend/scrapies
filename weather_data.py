@@ -1,4 +1,5 @@
 #download temperature data from usclimatedata.com
+#by: Kelly
 import urllib
 from bs4 import BeautifulSoup
 
