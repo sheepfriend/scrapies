@@ -46,7 +46,8 @@ def read_handi(table,time_):
 		else:
 			time_odd=item.contents[10].children.next().contents[0]
 			time_odd=time_odd.encode("utf8").split(",")
-			if compare(time_,time_odd)==True:					record.append(map(lambda x: x.contents,item.contents))
+			if compare(time_,time_odd)==True:					
+				record.append(map(lambda x: x.contents,item.contents))
 	return(record)
 	
 def read_ou(table,time_):
