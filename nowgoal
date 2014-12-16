@@ -1,0 +1,104 @@
+import urllib2
+import csv
+import re
+from bs4 import BeautifulSoup
+
+head=re.compile("showDate\(")
+tail=re.compile(",00\);")
+nbsp=re.compile("&nbsp;")
+title=re.compile("- 1x2 Odds \| Asian Handicap \| Over/Under")
+r=re.compile("\r|\t|\n")
+td=re.compile("<td></td>")
+
+def re_filt(text):
+	text=head.sub("",text)
+	text=tail.sub("",text)	
+	text=nbsp.sub("",text)
+	text=title.sub("",text)
+	text=r.sub("",text)
+	return(text)
+
+def read_time(soup):
+	time_=soup.find("tr",{"class":"scoretitle"}).children.next().contents[1].contents[0]
+	time_=time_.encode("utf8").split(",")
+	time_[1]=time_[1].strip("0")
+	return(time_)
+
+def read_name(soup):
+	name=soup.find_all("title")[0].contents[0]
+	name=map(lambda x:x.strip(u" "), name.split("Vs"))
+	return(name)
+
+def compare(time1,time2):
+	time2[1]=time2[1].strip(u"0")
+	time_=int(time1[3])*60+int(time1[4])-int(time2[3])*60-int(time2[4])
+	if time_<=30 and time_>=0 and time1[1]==time2[1] and time1[2]==time2[2]:
+		return True
+	else:
+		return False
+
+def read_handi(table,time_):
+	record=[]
+	i=0
+	for item in table.contents:
+		if i==0:
+			i=1
+		else:
+			time_odd=item.contents[10].children.next().contents[0]
+			time_odd=time_odd.encode("utf8").split(",")
+			if compare(time_,time_odd)==True:
+			record.append(map(lambda x: x.contents,item.contents))
+	return(record)
+	
+def read_ou(table,time_):
+	record=[]
+	i=0
+	for item in table.contents:
+		if i==0:
+			i=1
+		else:
+			time_odd=item.contents[8].children.next().contents[0]
+			time_odd=time_odd.encode("utf8").split(",")
+			if compare(time_,time_odd)==True:
+				record.append(map(lambda x: x.contents,item.contents))
+	return(record)
+	
+def parse(list_,name):
+	str_=""
+	for items in list_:
+		for item in items:
+			if len(item)==0:
+				str_=str_+","
+			elif len(item)==2:
+				str_=str_+item[0].contents[0]+" "+item[1].contents[0].contents[0]+" "+item[1].contents[1]+","
+			else:
+				str_=str_+item[0].contents[0].lstrip("<script>").rstrip("</script>")+","+name[0]+","+name[1]+"\n"
+	return(str_)
+
+def save_table(item):
+	http=urllib2.urlopen("http://data.nowgoal.com/OddsComp.aspx?id="+item)
+	print("http://data.nowgoal.com/OddsComp.aspx?id="+item)
+	text=re_filt(http.read())
+	soup=BeautifulSoup(text)
+	team=read_name(soup)
+	time_=read_time(soup)
+	temp=soup.find('table',id="Table1")
+	record_handi=parse(read_handi(temp,time_),team)
+	temp=soup.find('table',id="Table2")
+	record_ou=parse(read_ou(temp,time_),team)
+	return([record_handi,record_ou])
+
+p=open('address.csv','rb')
+text=p.read().split('\r')
+record_handi=""
+record_ou=""
+for item in text:
+	temp=save_table(item)
+	record_handi=record_handi+temp[0]
+	record_ou=record_ou+temp[1]
+p1=open("handi.csv",'w')
+p2=open("ou_csv",'w')
+p1.write(record_handi)
+p2.write(record_ou)
+p1.close()
+p2.close()
