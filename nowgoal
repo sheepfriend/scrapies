@@ -46,8 +46,7 @@ def read_handi(table,time_):
 		else:
 			time_odd=item.contents[10].children.next().contents[0]
 			time_odd=time_odd.encode("utf8").split(",")
-			if compare(time_,time_odd)==True:
-			record.append(map(lambda x: x.contents,item.contents))
+			if compare(time_,time_odd)==True:					record.append(map(lambda x: x.contents,item.contents))
 	return(record)
 	
 def read_ou(table,time_):
@@ -88,17 +87,20 @@ def save_table(item):
 	record_ou=parse(read_ou(temp,time_),team)
 	return([record_handi,record_ou])
 
-p=open('address.csv','rb')
-text=p.read().split('\r')
-record_handi=""
-record_ou=""
-for item in text:
-	temp=save_table(item)
-	record_handi=record_handi+temp[0]
-	record_ou=record_ou+temp[1]
-p1=open("handi.csv",'w')
-p2=open("ou_csv",'w')
-p1.write(record_handi)
-p2.write(record_ou)
-p1.close()
-p2.close()
+
+for i in range(0,7):
+	p=open('address'+i+'.csv','rb')
+	text=p.read().split('\r')
+	record_handi=""
+	record_ou=""
+	for item in text:
+		temp=save_table(item)
+		record_handi=record_handi+temp[0]
+		record_ou=record_ou+temp[1]
+	p1=open("handi"+i+".csv",'w')
+	p2=open("ou"+i+".csv",'w')
+	p1.write(record_handi)
+	p2.write(record_ou)
+	p1.close()
+	p2.close()
+	p.close()
